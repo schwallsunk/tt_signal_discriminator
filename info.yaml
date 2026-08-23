@@ -1,7 +1,7 @@
 # Tiny Tapeout project information
 project:
   title:        "Highspeed voltage discriminator"      # Project title
-  author:       "Axel Monney"      # Your name
+  author:       "Schwallsunk"      # Your name
   discord:      ""      # Your discord username, for communication and automatically assigning you a Tapeout role (optional)
   description:  "Used as a digital front end for event counting"      # One line description of what your project does
   language:     "Verilog" # other examples include SystemVerilog, Amaranth, VHDL, etc

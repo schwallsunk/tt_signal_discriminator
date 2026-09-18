@@ -56,7 +56,7 @@ module tt_um_schwallsunk_signal_discriminator (
     delay_gate_sim_triple dly4(.in(dff_output_q),.out(dly_dff_rst_3));
     delay_gate_sim_nine dly5(.in(dff_output_q),.out(dly_dff_rst_9));
     delay_gate_sim_twenty_seven dly6(.in(dff_output_q),.out(dly_dff_rst_27));
-    (* keep *) sg13g2_dfrbp_2  mux0(.A0(dly_dff_rst_1),.A1(dly_dff_rst_3),.A2(dly_dff_rst_9),.A3(dly_dff_rst_27),.S0(ui_in[2]),.S1(ui_in[3]),.X(dly_dff_output_q));
+    (* keep *) sg13g2_mux4_1 mux0(.A0(dly_dff_rst_1),.A1(dly_dff_rst_3),.A2(dly_dff_rst_9),.A3(dly_dff_rst_27),.S0(ui_in[2]),.S1(ui_in[3]),.X(dly_dff_output_q));
     //mux_4_to_1 mux0(.A0(dly_dff_rst_1),.A1(dly_dff_rst_3),.A2(dly_dff_rst_9),.A3(dly_dff_rst_27),.S0(ui_in[2]),.S1(ui_in[3]),.X(dly_dff_output_q));
     (* keep *) sg13g2_xnor2_1 xor0(.Y(rst_dff_output), .A(rst_n), .B(dly_dff_output_q));
     //xor_gate_level xor0(.a(rst_n),.b(dly_dff_output_q),.out(rst_dff_output));

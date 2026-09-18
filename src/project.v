@@ -16,18 +16,17 @@ module tt_um_schwallsunk_signal_discriminator (
     input  wire       rst_n     // reset_n - low to reset
 );
     assign uio_oe  = 8'b11111111; // port uio goes all out
+    assign uio_out  = 8'b11111111; // port uio goes all out
+    assign uo_out[7:1] = 7'b0000000;
     wire internal_rst; // Internal reset signal based on lower threshold state as well as external reset signal
     wire internal_rst_n; // Internal reset signal based on lower threshold state as well as external reset signal
     wire rst;
     wire dly_high; // Internal reset signal based on lower threshold state as well as external reset signal
-    wire dff_high_q; // Output D-FF of the high triggered FF
     wire dff_high_qn; // Output D-FF of the high triggered FF
     wire dly_low; // Internal reset signal based on lower threshold state as well as external reset signal
     wire dff_low_q; // Output D-FF of the low triggered FF
-    wire dff_low_qn; // Output D-FF of the low triggered FF
     wire coincidence_cont_q; // conincidence detection and rejection output
     wire dff_output_q;
-    wire dff_output_qn;
     wire rst_dff_output;
     wire dly_dff_rst_1;
     wire dly_dff_rst_3;
@@ -39,8 +38,8 @@ module tt_um_schwallsunk_signal_discriminator (
     (* keep *) sg13g2_dlygate4sd2_1  dly0(.X(dly_low), .A(ui_in[0]));
     (* keep *) sg13g2_dlygate4sd2_1  dly1(.X(dly_high), .A(ui_in[1]));
     (* keep *) sg13g2_and2_1  and0(.X(internal_rst), .A(ui_in[0]), .B(rst_n));
-    (* keep *) sg13g2_dfrbp_1  dff_low(.CLK(dly_low),.RESET_B(internal_rst),.D(1'b1),.Q(dff_low_q),.Q_N());
-    (* keep *) sg13g2_dfrbp_1  dff_high(.CLK(dly_high),.RESET_B(internal_rst),.D(1'b1),.Q(),.Q_N(dff_high_qn));
+    (* keep *) sg13g2_dfrbp_1  dff_low(.CLK(dly_low),.RESET_B(internal_rst),.D(1'b1),.Q(dff_low_q));
+    (* keep *) sg13g2_dfrbp_1  dff_high(.CLK(dly_high),.RESET_B(internal_rst),.D(1'b1),.Q_N(dff_high_qn));
     (* keep *) sg13g2_and2_1  and1(.X(coincidence_cont_q), .A(dff_high_qn), .B(dff_low_q));
     //inverter inv0 (.in(internal_rst),.out(internal_rst_n));
     (* keep *) sg13g2_inv_2  inv0(.Y(internal_rst_n), .A(internal_rst));
@@ -48,7 +47,7 @@ module tt_um_schwallsunk_signal_discriminator (
     (* keep *) sg13g2_inv_2  inv1(.Y(rst), .A(rst_n));
     //(* keep *) sg13g2_dlygate4sd2_1  dly2(.X(dly_high), .A(ui_in[1]));
     //delay_gate_sim dly2 (.in(ui_in[1]),.out(dly_high)); Whats that ?
-    (* keep *) sg13g2_dfrbp_1  dff_output(.CLK(internal_rst_n),.RESET_B(rst_dff_output),.D(coincidence_cont_q),.Q(dff_output_q),.Q_N());
+    (* keep *) sg13g2_dfrbp_1  dff_output(.CLK(internal_rst_n),.RESET_B(rst_dff_output),.D(coincidence_cont_q),.Q(dff_output_q));
     //d_ff_async_reset dff_output (.clk(internal_rst_n),.rst_n(rst_dff_output),.d(coincidence_cont_q),.q(dff_output_q),.qn(dff_output_qn));
     //(* keep *) sg13g2_dlygate4sd2_1  dly2(.X(dly_dff_rst_1), .A(dff_output_q));
     delay_gate_sim dly3(.in(dff_output_q),.out(dly_dff_rst_1));

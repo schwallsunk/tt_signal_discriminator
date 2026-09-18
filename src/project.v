@@ -15,7 +15,7 @@ module tt_um_schwallsunk_signal_discriminator (
     input  wire       clk,      // clock
     input  wire       rst_n     // reset_n - low to reset
 );
-
+    assign uio_oe  = 8'b11111111; // port uio goes all out
     wire internal_rst; // Internal reset signal based on lower threshold state as well as external reset signal
     wire internal_rst_n; // Internal reset signal based on lower threshold state as well as external reset signal
     wire rst;
@@ -28,7 +28,6 @@ module tt_um_schwallsunk_signal_discriminator (
     wire coincidence_cont_q; // conincidence detection and rejection output
     wire dff_output_q;
     wire dff_output_qn;
-    wire xor_output_q;
     wire rst_dff_output;
     wire dly_dff_rst_1;
     wire dly_dff_rst_3;
@@ -40,8 +39,8 @@ module tt_um_schwallsunk_signal_discriminator (
     (* keep *) sg13g2_dlygate4sd2_1  dly0(.X(dly_low), .A(ui_in[0]));
     (* keep *) sg13g2_dlygate4sd2_1  dly1(.X(dly_high), .A(ui_in[1]));
     (* keep *) sg13g2_and2_1  and0(.X(internal_rst), .A(ui_in[0]), .B(rst_n));
-    (* keep *) sg13g2_dfrbp_2  dff_low(.CLK(dly_low),.RESET_B(internal_rst),.D(1'b1),.Q(dff_low_q),.Q_N(dff_low_qn));
-    (* keep *) sg13g2_dfrbp_2  dff_high(.CLK(dly_high),.RESET_B(internal_rst),.D(1'b1),.Q(dff_high_q),.Q_N(dff_high_qn));
+    (* keep *) sg13g2_dfrbp_1  dff_low(.CLK(dly_low),.RESET_B(internal_rst),.D(1'b1),.Q(dff_low_q),.Q_N());
+    (* keep *) sg13g2_dfrbp_1  dff_high(.CLK(dly_high),.RESET_B(internal_rst),.D(1'b1),.Q(),.Q_N(dff_high_qn));
     (* keep *) sg13g2_and2_1  and1(.X(coincidence_cont_q), .A(dff_high_qn), .B(dff_low_q));
     //inverter inv0 (.in(internal_rst),.out(internal_rst_n));
     (* keep *) sg13g2_inv_2  inv0(.Y(internal_rst_n), .A(internal_rst));
@@ -49,7 +48,7 @@ module tt_um_schwallsunk_signal_discriminator (
     (* keep *) sg13g2_inv_2  inv1(.Y(rst), .A(rst_n));
     //(* keep *) sg13g2_dlygate4sd2_1  dly2(.X(dly_high), .A(ui_in[1]));
     //delay_gate_sim dly2 (.in(ui_in[1]),.out(dly_high)); Whats that ?
-    (* keep *) sg13g2_dfrbp_2  dff_output(.CLK(internal_rst_n),.RESET_B(rst_dff_output),.D(coincidence_cont_q),.Q(dff_output_q),.Q_N(dff_output_qn));
+    (* keep *) sg13g2_dfrbp_1  dff_output(.CLK(internal_rst_n),.RESET_B(rst_dff_output),.D(coincidence_cont_q),.Q(dff_output_q),.Q_N());
     //d_ff_async_reset dff_output (.clk(internal_rst_n),.rst_n(rst_dff_output),.d(coincidence_cont_q),.q(dff_output_q),.qn(dff_output_qn));
     //(* keep *) sg13g2_dlygate4sd2_1  dly2(.X(dly_dff_rst_1), .A(dff_output_q));
     delay_gate_sim dly3(.in(dff_output_q),.out(dly_dff_rst_1));
@@ -58,7 +57,7 @@ module tt_um_schwallsunk_signal_discriminator (
     delay_gate_sim_twenty_seven dly6(.in(dff_output_q),.out(dly_dff_rst_27));
     (* keep *) sg13g2_mux4_1 mux0(.A0(dly_dff_rst_1),.A1(dly_dff_rst_3),.A2(dly_dff_rst_9),.A3(dly_dff_rst_27),.S0(ui_in[2]),.S1(ui_in[3]),.X(dly_dff_output_q));
     //mux_4_to_1 mux0(.A0(dly_dff_rst_1),.A1(dly_dff_rst_3),.A2(dly_dff_rst_9),.A3(dly_dff_rst_27),.S0(ui_in[2]),.S1(ui_in[3]),.X(dly_dff_output_q));
-    (* keep *) sg13g2_xnor2_1 xor0(.Y(rst_dff_output), .A(rst_n), .B(dly_dff_output_q));
+    (* keep *) sg13g2_xnor2_1 xnor0(.Y(rst_dff_output), .A(rst), .B(dly_dff_output_q));
     //xor_gate_level xor0(.a(rst_n),.b(dly_dff_output_q),.out(rst_dff_output));
     
 
@@ -67,7 +66,7 @@ module tt_um_schwallsunk_signal_discriminator (
   //assign uio_oe  = 0;
 
   // List all unused inputs to prevent warnings
-  wire _unused = &{ena, clk, 1'b0};
+    wire _unused = &{ui_in[7:4], uio_in, ena, clk, 1'b0};
 
 endmodule
 

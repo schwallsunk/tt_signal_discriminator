@@ -210,7 +210,7 @@ async def test_high_threshold_behavior(dut):
     # Activate high threshold.
     await set_inputs(
         dut,
-        low=0,
+        low=1,
         high=1,
     )
 

@@ -80,7 +80,7 @@ async def test_low_without_high(dut):
     #             -> dff_output
     #
     # to propagate through the standard cells.
-    await Timer(5, unit="ns")
+    await Timer(10, unit="ns")
 
     dut._log.info(f"uo_out = {dut.uo_out.value}")
 

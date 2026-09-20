@@ -54,9 +54,9 @@ module tt_um_schwallsunk_signal_discriminator (
     delay_gate_sim_triple dly4(.in(dff_output_q),.out(dly_dff_rst_3));
     delay_gate_sim_nine dly5(.in(dff_output_q),.out(dly_dff_rst_9));
     delay_gate_sim_twenty_seven dly6(.in(dff_output_q),.out(dly_dff_rst_27));
+    (* keep *) sg13g2_mux4_1 mux0(.A0(dly_dff_rst_1),.A1(dly_dff_rst_3),.A2(dly_dff_rst_9),.A3(dly_dff_rst_27),.S0(ui_in[2]),.S1(ui_in[3]),.X(dly_dff_output_q));
     (* keep *) sg13g2_mux2_1 mux1(.X(rst_dff_output), .A0(1'b1), .A1(dly_dff_output_q), .S(rst_n));
     (* keep *) sg13g2_inv_2  inv3(.Y(rst_dff_output_n), .A(rst_dff_output));
-    //(* keep *) sg13g2_mux4_1 mux0(.A0(dly_dff_rst_1),.A1(dly_dff_rst_3),.A2(dly_dff_rst_9),.A3(dly_dff_rst_27),.S0(ui_in[2]),.S1(ui_in[3]),.X(dly_dff_output_q));
     //(* keep *) sg13g2_xnor2_1 xnor0(.Y(rst_dff_output), .A(rst), .B(dly_dff_output_q));
     
 

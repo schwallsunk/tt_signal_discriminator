@@ -87,6 +87,127 @@ async def generate_low_transition(dut):
     await set_inputs(dut, low=0, high=0)
     await settle()
 
+async def latch_counter(dut):
+    """
+    Capture the current 32-bit counter value into the shift register.
+
+    All waits are long enough for the physical cell-level simulation
+    to settle; this is intentionally not a zero-delay RTL test.
+    """
+
+    # Ensure latch is low before creating the rising edge.
+    await set_inputs(
+        dut,
+        low=0,
+        high=0,
+        latch=0,
+        counter0=0,
+        counter1=0,
+    )
+    await settle()
+
+    # Rising edge of latch.
+    await set_inputs(
+        dut,
+        low=0,
+        high=0,
+        latch=1,
+        counter0=0,
+        counter1=0,
+    )
+    await settle()
+
+    # Return latch low.
+    await set_inputs(
+        dut,
+        low=0,
+        high=0,
+        latch=0,
+        counter0=0,
+        counter1=0,
+    )
+    await settle()
+
+
+async def read_counter_byte(dut, byte):
+    """
+    Read one byte of the latched 32-bit counter.
+
+    byte 0 = bits 7:0
+    byte 1 = bits 15:8
+    byte 2 = bits 23:16
+    byte 3 = bits 31:24
+    """
+
+    assert 0 <= byte <= 3
+
+    counter0 = byte & 1
+    counter1 = (byte >> 1) & 1
+
+    await set_inputs(
+        dut,
+        low=0,
+        high=0,
+        latch=0,
+        counter0=counter0,
+        counter1=counter1,
+    )
+    await settle()
+
+    assert dut.uio_out.value.is_resolvable
+
+    return int(dut.uio_out.value)
+
+
+async def read_counter(dut):
+    """Read all four bytes and reconstruct the 32-bit value."""
+
+    value = 0
+
+    for byte in range(4):
+        value |= await read_counter_byte(dut, byte) << (8 * byte)
+
+    return value
+
+
+async def generate_counter_event(dut):
+    """
+    Generate one candidate discriminator event.
+
+    Whether this produces exactly one counter increment should
+    be established from the waveform/RTL behavior.
+    """
+
+    await set_inputs(
+        dut,
+        low=0,
+        high=0,
+        latch=0,
+        counter0=0,
+        counter1=0,
+    )
+    await settle()
+
+    await set_inputs(
+        dut,
+        low=1,
+        high=0,
+        latch=0,
+        counter0=0,
+        counter1=0,
+    )
+    await settle()
+
+    await set_inputs(
+        dut,
+        low=0,
+        high=0,
+        latch=0,
+        counter0=0,
+        counter1=0,
+    )
+    await settle()
+
 
 # ============================================================
 # TEST 1
@@ -343,7 +464,7 @@ async def test_event_output(dut):
 
 # ============================================================
 # TEST 6
-# Counter/latch output
+# Counter functionality
 # ============================================================
 
 @cocotb.test()
@@ -351,93 +472,48 @@ async def test_counter(dut):
 
     await reset_dut(dut)
 
-    # Start from idle.
-    await set_inputs(
-        dut,
-        low=0,
-        high=0,
-        latch=0,
-        counter0=0,
-        counter1=0,
-    )
-
-    await settle()
-
-    # Generate the discriminator transition.
-    await set_inputs(
-        dut,
-        low=1,
-        high=0,
-        latch=0,
-        counter0=0,
-        counter1=0,
-    )
-
-    await settle()
-
-    await set_inputs(
-        dut,
-        low=0,
-        high=0,
-        latch=0,
-        counter0=0,
-        counter1=0,
-    )
-
-    await settle()
-
     # --------------------------------------------------------
-    # Latch counter
+    # Counter should start at zero.
     # --------------------------------------------------------
 
-    await set_inputs(
-        dut,
-        low=0,
-        high=0,
-        latch=0,
-        counter0=0,
-        counter1=0,
-    )
+    await latch_counter(dut)
 
-    await Timer(1, units="ns")
-
-    # Rising edge of latch_res.
-    await set_inputs(
-        dut,
-        low=0,
-        high=0,
-        latch=1,
-        counter0=0,
-        counter1=0,
-    )
-
-    await Timer(2, units="ns")
-
-    # Falling edge.
-    await set_inputs(
-        dut,
-        low=0,
-        high=0,
-        latch=0,
-        counter0=0,
-        counter1=0,
-    )
-
-    await settle()
-
-    assert dut.uio_out.value.is_resolvable, (
-        f"uio_out became unknown after counter latch: "
-        f"{dut.uio_out.value}"
-    )
-
-    value = int(dut.uio_out.value)
+    value = await read_counter(dut)
 
     dut._log.info(
-        "Counter byte 0 = 0x%02x",
+        "Counter after reset = 0x%08x",
         value,
     )
 
-    assert 0 <= value <= 255
+    assert value == 0, (
+        f"Counter did not reset to zero: "
+        f"0x{value:08x}"
+    )
+
+    # --------------------------------------------------------
+    # Generate several events and verify counting.
+    # --------------------------------------------------------
+
+    for expected in range(1, 6):
+
+        await generate_counter_event(dut)
+
+        # The counter is a ripple counter, so give all stages
+        # time to propagate before latching.
+        await latch_counter(dut)
+
+        value = await read_counter(dut)
+
+        dut._log.info(
+            "After event %d: counter = 0x%08x",
+            expected,
+            value,
+        )
+
+        assert value == expected, (
+            f"Expected counter={expected}, "
+            f"got 0x{value:08x}"
+        )
 # ============================================================
 # TEST 7
 # Counter byte multiplexer
@@ -448,39 +524,31 @@ async def test_counter_byte_mux(dut):
 
     await reset_dut(dut)
 
-    values = {}
+    # Generate one counter event.
+    await generate_counter_event(dut)
 
-    for counter1, counter0 in [
-        (0, 0),
-        (0, 1),
-        (1, 0),
-        (1, 1),
-    ]:
+    await latch_counter(dut)
 
-        await set_inputs(
-            dut,
-            counter0=counter0,
-            counter1=counter1,
-            latch=0,
-        )
+    # Read the four bytes.
+    byte0 = await read_counter_byte(dut, 0)
+    byte1 = await read_counter_byte(dut, 1)
+    byte2 = await read_counter_byte(dut, 2)
+    byte3 = await read_counter_byte(dut, 3)
 
-        await settle()
+    dut._log.info(
+        "Counter bytes: "
+        "B3=%02x B2=%02x B1=%02x B0=%02x",
+        byte3,
+        byte2,
+        byte1,
+        byte0,
+    )
 
-        assert dut.uio_out.value.is_resolvable
-
-        value = int(dut.uio_out.value)
-
-        values[(counter1, counter0)] = value
-
-        dut._log.info(
-            "counter mux %d%d -> 0x%02x",
-            counter1,
-            counter0,
-            value,
-        )
-
-        assert 0 <= value <= 255
-
+    # Assuming one discriminator event increments the counter once.
+    assert byte0 == 0x01
+    assert byte1 == 0x00
+    assert byte2 == 0x00
+    assert byte3 == 0x00
 
 # ============================================================
 # TEST 8
@@ -645,3 +713,55 @@ async def test_discriminator_debug(dut):
     dut._log.info("uo_out = %s", dut.uo_out.value)
 
     assert dut.uo_out.value.is_resolvable
+
+# ============================================================
+# TEST 10
+# Counter reset after counting
+# ============================================================
+
+@cocotb.test()
+async def test_counter_reset(dut):
+
+    await reset_dut(dut)
+
+    # Build up a non-zero count.
+    for _ in range(3):
+        await generate_counter_event(dut)
+
+    await latch_counter(dut)
+
+    before_reset = await read_counter(dut)
+
+    dut._log.info(
+        "Counter before second reset = 0x%08x",
+        before_reset,
+    )
+
+    assert before_reset != 0, (
+        "Counter never became non-zero"
+    )
+
+    # --------------------------------------------------------
+    # Apply external reset.
+    # --------------------------------------------------------
+
+    dut.rst_n.value = 0
+    await Timer(10, units="ns")
+
+    dut.rst_n.value = 1
+    await settle()
+
+    # Capture counter after reset.
+    await latch_counter(dut)
+
+    after_reset = await read_counter(dut)
+
+    dut._log.info(
+        "Counter after second reset = 0x%08x",
+        after_reset,
+    )
+
+    assert after_reset == 0, (
+        f"Counter did not reset: "
+        f"0x{after_reset:08x}"
+    )

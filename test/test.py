@@ -771,50 +771,45 @@ async def test_counter_reset(dut):
 # ============================================================
 
 @cocotb.test()
-async def test_counter_byte_mux_patterns(dut):
-
+async def test_counter_byte_mux(dut):
     await reset_dut(dut)
 
-    # --------------------------------------------------------
-    # Pattern 1: 0x00000001
-    # --------------------------------------------------------
-
+    # Generate exactly one counter event.
     await generate_counter_event(dut)
+
+    # Capture the counter value into the shift register.
     await latch_counter(dut)
 
-    value = await read_counter(dut)
+    # The waveform shows the counter transitioning 0 -> 1.
+    expected = 0x00000001
 
+    # Check the complete latched value first.
+    actual = await read_counter(dut)
     dut._log.info(
-        "Counter pattern 1 = 0x%08x",
-        value,
+        "Latched counter: expected=0x%08x actual=0x%08x",
+        expected,
+        actual,
+    )
+    assert actual == expected, (
+        f"Latched counter mismatch: "
+        f"expected 0x{expected:08x}, got 0x{actual:08x}"
     )
 
-    assert value == 0x00000001
+    # Now test each byte-selection combination.
+    expected_bytes = [0x01, 0x00, 0x00, 0x00]
 
-    assert await read_counter_byte(dut, 0) == 0x01
-    assert await read_counter_byte(dut, 1) == 0x00
-    assert await read_counter_byte(dut, 2) == 0x00
-    assert await read_counter_byte(dut, 3) == 0x00
+    for byte in range(4):
+        actual_byte = await read_counter_byte(dut, byte)
 
-    # --------------------------------------------------------
-    # Pattern 2: 0x00000005
-    # --------------------------------------------------------
+        dut._log.info(
+            "Counter byte %d: expected=0x%02x actual=0x%02x",
+            byte,
+            expected_bytes[byte],
+            actual_byte,
+        )
 
-    for _ in range(4):
-        await generate_counter_event()
-
-    await latch_counter(dut)
-
-    value = await read_counter(dut)
-
-    dut._log.info(
-        "Counter pattern 2 = 0x%08x",
-        value,
-    )
-
-    assert value == 0x00000005
-
-    assert await read_counter_byte(dut, 0) == 0x05
-    assert await read_counter_byte(dut, 1) == 0x00
-    assert await read_counter_byte(dut, 2) == 0x00
-    assert await read_counter_byte(dut, 3) == 0x00
+        assert actual_byte == expected_bytes[byte], (
+            f"Counter byte {byte} mismatch: "
+            f"expected 0x{expected_bytes[byte]:02x}, "
+            f"got 0x{actual_byte:02x}"
+        )

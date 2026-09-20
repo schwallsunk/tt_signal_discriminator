@@ -765,3 +765,56 @@ async def test_counter_reset(dut):
         f"Counter did not reset: "
         f"0x{after_reset:08x}"
     )
+# ============================================================
+# TEST 11
+# Counter byte mux integration
+# ============================================================
+
+@cocotb.test()
+async def test_counter_byte_mux_patterns(dut):
+
+    await reset_dut(dut)
+
+    # --------------------------------------------------------
+    # Pattern 1: 0x00000001
+    # --------------------------------------------------------
+
+    await generate_counter_event(dut)
+    await latch_counter(dut)
+
+    value = await read_counter(dut)
+
+    dut._log.info(
+        "Counter pattern 1 = 0x%08x",
+        value,
+    )
+
+    assert value == 0x00000001
+
+    assert await read_counter_byte(dut, 0) == 0x01
+    assert await read_counter_byte(dut, 1) == 0x00
+    assert await read_counter_byte(dut, 2) == 0x00
+    assert await read_counter_byte(dut, 3) == 0x00
+
+    # --------------------------------------------------------
+    # Pattern 2: 0x00000005
+    # --------------------------------------------------------
+
+    for _ in range(4):
+        await generate_counter_event()
+
+    await latch_counter(dut)
+
+    value = await read_counter(dut)
+
+    dut._log.info(
+        "Counter pattern 2 = 0x%08x",
+        value,
+    )
+
+    assert value == 0x00000005
+
+    assert await read_counter_byte(dut, 0) == 0x05
+    assert await read_counter_byte(dut, 1) == 0x00
+    assert await read_counter_byte(dut, 2) == 0x00
+    assert await read_counter_byte(dut, 3) == 0x00

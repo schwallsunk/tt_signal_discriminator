@@ -269,12 +269,12 @@ module shift_reg_32_bit (
 
     (* keep *) sg13g2_mux4_1 mux_bit_0(.A0(dff_out_0),.A1(dff_out_8),.A2(dff_out_16),.A3(dff_out_24),.S0(adress[0]),.S1(adress[1]),.X(out_uio[0]));
     (* keep *) sg13g2_mux4_1 mux_bit_1(.A0(dff_out_1),.A1(dff_out_9),.A2(dff_out_17),.A3(dff_out_25),.S0(adress[0]),.S1(adress[1]),.X(out_uio[1]));
-    (* keep *) sg13g2_mux4_1 mux_bit_2(.A0(dff_out_2),.A1(dff_out_10),.A2(dff_out_17),.A3(dff_out_26),.S0(adress[0]),.S1(adress[1]),.X(out_uio[2]));
-    (* keep *) sg13g2_mux4_1 mux_bit_3(.A0(dff_out_3),.A1(dff_out_11),.A2(dff_out_18),.A3(dff_out_27),.S0(adress[0]),.S1(adress[1]),.X(out_uio[3]));
-    (* keep *) sg13g2_mux4_1 mux_bit_4(.A0(dff_out_4),.A1(dff_out_12),.A2(dff_out_19),.A3(dff_out_28),.S0(adress[0]),.S1(adress[1]),.X(out_uio[4]));
-    (* keep *) sg13g2_mux4_1 mux_bit_5(.A0(dff_out_5),.A1(dff_out_13),.A2(dff_out_20),.A3(dff_out_29),.S0(adress[0]),.S1(adress[1]),.X(out_uio[5]));
-    (* keep *) sg13g2_mux4_1 mux_bit_6(.A0(dff_out_6),.A1(dff_out_14),.A2(dff_out_21),.A3(dff_out_30),.S0(adress[0]),.S1(adress[1]),.X(out_uio[6]));
-    (* keep *) sg13g2_mux4_1 mux_bit_7(.A0(dff_out_7),.A1(dff_out_15),.A2(dff_out_22),.A3(dff_out_31),.S0(adress[0]),.S1(adress[1]),.X(out_uio[7]));
+    (* keep *) sg13g2_mux4_1 mux_bit_2(.A0(dff_out_2),.A1(dff_out_10),.A2(dff_out_18),.A3(dff_out_26),.S0(adress[0]),.S1(adress[1]),.X(out_uio[2]));
+    (* keep *) sg13g2_mux4_1 mux_bit_3(.A0(dff_out_3),.A1(dff_out_11),.A2(dff_out_19),.A3(dff_out_27),.S0(adress[0]),.S1(adress[1]),.X(out_uio[3]));
+    (* keep *) sg13g2_mux4_1 mux_bit_4(.A0(dff_out_4),.A1(dff_out_12),.A2(dff_out_20),.A3(dff_out_28),.S0(adress[0]),.S1(adress[1]),.X(out_uio[4]));
+    (* keep *) sg13g2_mux4_1 mux_bit_5(.A0(dff_out_5),.A1(dff_out_13),.A2(dff_out_21),.A3(dff_out_29),.S0(adress[0]),.S1(adress[1]),.X(out_uio[5]));
+    (* keep *) sg13g2_mux4_1 mux_bit_6(.A0(dff_out_6),.A1(dff_out_14),.A2(dff_out_22),.A3(dff_out_30),.S0(adress[0]),.S1(adress[1]),.X(out_uio[6]));
+    (* keep *) sg13g2_mux4_1 mux_bit_7(.A0(dff_out_7),.A1(dff_out_15),.A2(dff_out_23),.A3(dff_out_31),.S0(adress[0]),.S1(adress[1]),.X(out_uio[7]));
     
     (* keep *) sg13g2_dfrbpq_1 dff_bit_out_0(.Q(dff_out_0), .CLK(latch_res), .D(input_bits[0]), .RESET_B(rst_n));
     (* keep *) sg13g2_dfrbpq_1 dff_bit_out_1(.Q(dff_out_1), .CLK(latch_res), .D(input_bits[1]), .RESET_B(rst_n));

@@ -290,32 +290,56 @@ async def test_event_output(dut):
 
     await reset_dut(dut)
 
-    # Start inactive.
+    # Start from the known idle state.
     await set_inputs(
         dut,
         low=0,
         high=0,
+        delay0=0,
+        delay1=0,
     )
 
     await settle()
 
-    assert int(dut.uo_out.value[0]) == 0
-
-    # Apply low-threshold transition.
-    await generate_low_transition(dut)
-
-    # At this point we only require a known output.
-    #
-    # This intentionally does NOT assume that the transition
-    # produces an event until the discriminator timing has
-    # been confirmed.
-    assert dut.uo_out.value[0].is_resolvable
-
-    dut._log.info(
-        "event output after low transition = %d",
-        int(dut.uo_out.value[0]),
+    assert int(dut.uo_out.value[0]) == 0, (
+        f"Output is not idle after reset: "
+        f"uo_out={dut.uo_out.value}"
     )
 
+    # Apply a low-threshold pulse.
+    await set_inputs(
+        dut,
+        low=1,
+        high=0,
+        delay0=0,
+        delay1=0,
+    )
+
+    await settle()
+
+    # Remove the low threshold.
+    await set_inputs(
+        dut,
+        low=0,
+        high=0,
+        delay0=0,
+        delay1=0,
+    )
+
+    await settle()
+
+    # For now, verify that the discriminator output is
+    # deterministic rather than assuming the pulse must
+    # generate an event.
+    assert dut.uo_out.value[0].is_resolvable, (
+        f"Discriminator output became unknown: "
+        f"uo_out={dut.uo_out.value}"
+    )
+
+    dut._log.info(
+        "Discriminator output after low pulse = %d",
+        int(dut.uo_out.value[0]),
+    )
 
 # ============================================================
 # TEST 6
@@ -327,9 +351,11 @@ async def test_counter(dut):
 
     await reset_dut(dut)
 
-    # First make sure the output interface is initialized.
+    # Start from idle.
     await set_inputs(
         dut,
+        low=0,
+        high=0,
         latch=0,
         counter0=0,
         counter1=0,
@@ -337,14 +363,37 @@ async def test_counter(dut):
 
     await settle()
 
-    assert dut.uio_out.value.is_resolvable
+    # Generate the discriminator transition.
+    await set_inputs(
+        dut,
+        low=1,
+        high=0,
+        latch=0,
+        counter0=0,
+        counter1=0,
+    )
+
+    await settle()
+
+    await set_inputs(
+        dut,
+        low=0,
+        high=0,
+        latch=0,
+        counter0=0,
+        counter1=0,
+    )
+
+    await settle()
 
     # --------------------------------------------------------
-    # Latch current counter state.
+    # Latch counter
     # --------------------------------------------------------
 
     await set_inputs(
         dut,
+        low=0,
+        high=0,
         latch=0,
         counter0=0,
         counter1=0,
@@ -352,8 +401,11 @@ async def test_counter(dut):
 
     await Timer(1, units="ns")
 
+    # Rising edge of latch_res.
     await set_inputs(
         dut,
+        low=0,
+        high=0,
         latch=1,
         counter0=0,
         counter1=0,
@@ -361,8 +413,11 @@ async def test_counter(dut):
 
     await Timer(2, units="ns")
 
+    # Falling edge.
     await set_inputs(
         dut,
+        low=0,
+        high=0,
         latch=0,
         counter0=0,
         counter1=0,
@@ -370,14 +425,19 @@ async def test_counter(dut):
 
     await settle()
 
-    assert dut.uio_out.value.is_resolvable
-
-    dut._log.info(
-        "latched counter byte 0 = 0x%02x",
-        int(dut.uio_out.value),
+    assert dut.uio_out.value.is_resolvable, (
+        f"uio_out became unknown after counter latch: "
+        f"{dut.uio_out.value}"
     )
 
+    value = int(dut.uio_out.value)
 
+    dut._log.info(
+        "Counter byte 0 = 0x%02x",
+        value,
+    )
+
+    assert 0 <= value <= 255
 # ============================================================
 # TEST 7
 # Counter byte multiplexer

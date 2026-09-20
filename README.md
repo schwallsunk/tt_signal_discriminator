@@ -1,42 +1,33 @@
 ![](../../workflows/gds/badge.svg) ![](../../workflows/docs/badge.svg) ![](../../workflows/test/badge.svg) ![](../../workflows/fpga/badge.svg)
+<!---
 
-# Tiny Tapeout Verilog Project Template
+This file is used to generate your project datasheet. Please fill in the information below and delete any unused
+sections.
 
-- [Read the documentation for project](docs/info.md)
+You can also include images in this folder and reference them in the markdown. Each image must be less than
+512 kb in size, and the combined size of all images must be less than 1 MB.
+-->
 
-## What is Tiny Tapeout?
+## Welcome to the Highspeed voltage discriminator
 
-Tiny Tapeout is an educational project that aims to make it easier and cheaper than ever to get your digital and analog designs manufactured on a real chip.
+This project revolves around the digital signal processing of a single voltage pulse to determine if it lies between two thresholds and its counting. This kind of logic has widespread applications in physical counting and discrimination processes. 
 
-To learn more and get started, visit https://tinytapeout.com.
+## How it works
 
-## Set up your Verilog project
+The project at hand provides a purely digital implementation of a voltage window thresholding system. The logic of the system rejects every voltage outside of the given window, if it rises above the upper threshold signal. The output is a square wave signal, if the voltage pulse rose above the lower threshold but did not rise above the upper threshold for as long as the lower threshold was crossed. 
+The systems input relies on two external comparators, representing the upper and lower threshold of a given voltage window. These two signals convert the analog signal into a digital signal fed into the system. 
+The system has one 32 bit ripple counter and a second 32 bit shift register for ease of use. This allows for a parallel read out of the data whilst the counter is counting, reducing the required readout speed massively. 
 
-1. Add your Verilog files to the `src` folder.
-2. Edit the [info.yaml](info.yaml) and update information about your project, paying special attention to the `source_files` and `top_module` properties. If you are upgrading an existing Tiny Tapeout project, check out our [online info.yaml migration tool](https://tinytapeout.github.io/tt-yaml-upgrade-tool/).
-3. Edit [docs/info.md](docs/info.md) and add a description of your project.
-4. Adapt the testbench to your design. See [test/README.md](test/README.md) for more information.
+## How to test
 
-The GitHub action will automatically build the ASIC files using [LibreLane](https://www.zerotoasiccourse.com/terminology/librelane/).
+To test the system please use two discriminator hooking up the lower input to u_in[0] and the upper threshold to u_in[1]. In parallel there is a reset switch is using the rst_n input of the tinytapeout tile. This one needs to be pulled high to turn on the complete logic. This reset also clears the counter as well as the shift register. The output of the system is given through the 8 bit user flex io bus. To get all 32 bit a 4:1 multiplexing scheme is implemented. The different parts of the counter can be selected by means of using bits [6:5] of the dedicated inputs of the tile. 
+The counter value is shifted into the register by rising edge of u_in[4]. The output is then given by the uio_out[7:0] of the four blocks.
 
-## Enable GitHub actions to build the results page
+The discriminator output is exposed through u_out[1]. The output pulse lenght can be adjusted between 0.45ns to 12.75ns using bits [4:3] of the input pins. This is mainly provided in case of the requirement of an external interrogation of the system to provide a easy way to measure the output signal with common tools and not needing beyond 2 Gsps scopes to properly digitize the signal. 
 
-- [Enabling GitHub Pages](https://tinytapeout.com/faq/#my-github-action-is-failing-on-the-pages-part)
 
-## Resources
 
-- [FAQ](https://tinytapeout.com/faq/)
-- [Digital design lessons](https://tinytapeout.com/digital_design/)
-- [Learn how semiconductors work](https://tinytapeout.com/siliwiz/)
-- [Join the community](https://tinytapeout.com/discord)
-- [Build your design locally](https://www.tinytapeout.com/guides/local-hardening/)
 
-## What next?
+## External hardware
 
-- [Submit your design to the next shuttle](https://app.tinytapeout.com/).
-- Edit [this README](README.md) and explain your design, how it works, and how to test it.
-- Share your project on your social network of choice:
-  - LinkedIn [#tinytapeout](https://www.linkedin.com/search/results/content/?keywords=%23tinytapeout) [@TinyTapeout](https://www.linkedin.com/company/100708654/)
-  - Mastodon [#tinytapeout](https://chaos.social/tags/tinytapeout) [@matthewvenn](https://chaos.social/@matthewvenn)
-  - X (formerly Twitter) [#tinytapeout](https://twitter.com/hashtag/tinytapeout) [@tinytapeout](https://twitter.com/tinytapeout)
-  - Bluesky [@tinytapeout.com](https://bsky.app/profile/tinytapeout.com)
+Discriminators of the fast kind. The faster the better. 

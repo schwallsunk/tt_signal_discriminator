@@ -229,8 +229,8 @@ endmodule
 module shift_reg_32_bit (
     input  wire rst_n,
     input  wire latch_res,
-    input  wire adress[1:0],
-    input  wire [31:0] input_bits
+    input  wire [1:0] adress,
+    input  wire [31:0] input_bits,
     output wire [7:0] out_uio
 );
     

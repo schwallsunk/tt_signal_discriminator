@@ -20,7 +20,7 @@ module tt_um_schwallsunk_signal_discriminator (
     assign uo_out[7:1] = 7'b0000000;
     wire internal_rst; // Internal reset signal based on lower threshold state as well as external reset signal
     wire internal_rst_n; // Internal reset signal based on lower threshold state as well as external reset signal
-    wire del_internal_rst;
+    wire dly_internal_rst;
     wire rst;
     wire dly_high; // Internal reset signal based on lower threshold state as well as external reset signal
     wire dly_dly_high; // Internal reset signal based on lower threshold state as well as external reset signal
@@ -36,6 +36,7 @@ module tt_um_schwallsunk_signal_discriminator (
     wire dly_dff_rst_9;
     wire dly_dff_rst_27;
     wire dly_dff_output_q;
+    wire rst_dff_output_n;
 
   // All output pins must be assigned. If not used, assign to 0.
     (* keep *) sg13g2_dlygate4sd2_1  dly0(.X(dly_low), .A(ui_in[0]));
@@ -43,13 +44,13 @@ module tt_um_schwallsunk_signal_discriminator (
     (* keep *) sg13g2_dlygate4sd2_1  dly1(.X(dly_high), .A(ui_in[1]));
     (* keep *) sg13g2_dlygate4sd2_1  dly10(.X(dly_dly_high), .A(dly_high));
     (* keep *) sg13g2_and2_1  and0(.X(internal_rst), .A(ui_in[0]), .B(rst_n));
-    (* keep *) sg13g2_dlygate4sd2_1  dly2(.X(del_internal_rst), .A(internal_rst));
-    (* keep *) sg13g2_dfrbp_1  dff_low(.CLK(dly_low),.RESET_B(del_internal_rst),.D(1'b1),.Q(dff_low_q));
-    (* keep *) sg13g2_dfrbp_1  dff_high(.CLK(dly_high),.RESET_B(del_internal_rst),.D(1'b1),.Q_N(dff_high_qn));
+    (* keep *) sg13g2_dlygate4sd2_1  dly2(.X(dly_internal_rst), .A(internal_rst));
+    (* keep *) sg13g2_dfrbp_1  dff_low(.CLK(dly_low),.RESET_B(dly_internal_rst),.D(1'b1),.Q(dff_low_q));
+    (* keep *) sg13g2_dfrbp_1  dff_high(.CLK(dly_high),.RESET_B(dly_internal_rst),.D(1'b1),.Q_N(dff_high_qn));
     (* keep *) sg13g2_and2_1  and1(.X(coincidence_cont_q), .A(dff_high_qn), .B(dff_low_q));
     (* keep *) sg13g2_inv_2  inv0(.Y(internal_rst_n), .A(internal_rst));
     (* keep *) sg13g2_inv_2  inv1(.Y(rst), .A(rst_n));
-    (* keep *) sg13g2_dfrbp_1  dff_output(.CLK(internal_rst_n),.RESET_B(rst_dff_output),.D(coincidence_cont_q),.Q(dff_output_q));
+    (* keep *) sg13g2_dfrbp_1  dff_output(.CLK(internal_rst_n),.RESET_B(rst_dff_output_n),.D(coincidence_cont_q),.Q(dff_output_q));
     delay_gate_sim dly3(.in(dff_output_q),.out(dly_dff_rst_1));
     delay_gate_sim_triple dly4(.in(dff_output_q),.out(dly_dff_rst_3));
     delay_gate_sim_nine dly5(.in(dff_output_q),.out(dly_dff_rst_9));

@@ -53,7 +53,7 @@ async def test_low_without_high(dut):
     # ui_in[3:2] = 00 -> shortest delay path
     # ui_in[1]   = 0
     # ui_in[0]   = 1
-    dut.ui_in.value = 0b00000001
+    dut.ui_in.value = 0b00001101
 
     # Wait for the low-threshold delay gate and DFF to react.
     await Timer(10, unit="ns")
@@ -72,7 +72,7 @@ async def test_low_without_high(dut):
 
     dut._log.info("Falling ui_in[0]")
 
-    dut.ui_in.value = 0b00000000
+    dut.ui_in.value = 0b00001100
 
     # Allow:
     #   ui_in[0] -> internal_rst
@@ -80,7 +80,7 @@ async def test_low_without_high(dut):
     #             -> dff_output
     #
     # to propagate through the standard cells.
-    await Timer(10, unit="ns")
+    await Timer(5, unit="ns")
 
     dut._log.info(f"uo_out = {dut.uo_out.value}")
 

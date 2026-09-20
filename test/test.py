@@ -845,7 +845,7 @@ async def test_counter_carry_boundaries(dut):
     await check_counter(0x000000FF)
 
     # 0x000000FF -> 0x00000100
-    await generate_counter_event()
+    await generate_counter_event(dut)
     await check_counter(0x00000100)
 
     # 0x00000100 -> 0x0000FFFE
@@ -853,13 +853,13 @@ async def test_counter_carry_boundaries(dut):
     await check_counter(0x0000FFFE)
 
     # 0x0000FFFE -> 0x0000FFFF
-    await generate_counter_event()
+    await generate_counter_event(dut)
     await check_counter(0x0000FFFF)
 
     # 0x0000FFFF -> 0x00010000
-    await generate_counter_event()
+    await generate_counter_event(dut)
     await check_counter(0x00010000)
 
     # 0x00010000 -> 0x00010001
-    await generate_counter_event()
+    await generate_counter_event(dut)
     await check_counter(0x00010001)

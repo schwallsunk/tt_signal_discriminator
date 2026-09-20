@@ -813,3 +813,53 @@ async def test_counter_byte_mux(dut):
             f"expected 0x{expected_bytes[byte]:02x}, "
             f"got 0x{actual_byte:02x}"
         )
+# ============================================================
+# TEST 12
+# Counter boundary test
+# ============================================================
+
+@cocotb.test()
+async def test_counter_carry_boundaries(dut):
+    await reset_dut(dut)
+
+    async def count_events(number):
+        for _ in range(number):
+            await generate_counter_event(dut)
+
+    async def check_counter(expected):
+        await latch_counter(dut)
+        actual = await read_counter(dut)
+
+        dut._log.info(
+            "Counter: expected=0x%08x actual=0x%08x",
+            expected,
+            actual,
+        )
+
+        assert actual == expected, (
+            f"Expected 0x{expected:08x}, got 0x{actual:08x}"
+        )
+
+    # 0x00000000 -> 0x000000FF
+    await count_events(0xFF)
+    await check_counter(0x000000FF)
+
+    # 0x000000FF -> 0x00000100
+    await generate_counter_event()
+    await check_counter(0x00000100)
+
+    # 0x00000100 -> 0x0000FFFE
+    await count_events(0xFFFE - 0x0100)
+    await check_counter(0x0000FFFE)
+
+    # 0x0000FFFE -> 0x0000FFFF
+    await generate_counter_event()
+    await check_counter(0x0000FFFF)
+
+    # 0x0000FFFF -> 0x00010000
+    await generate_counter_event()
+    await check_counter(0x00010000)
+
+    # 0x00010000 -> 0x00010001
+    await generate_counter_event()
+    await check_counter(0x00010001)

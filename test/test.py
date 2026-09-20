@@ -518,3 +518,70 @@ async def test_complete_interface(dut):
 
     assert dut.uo_out.value.is_resolvable
     assert dut.uio_out.value.is_resolvable
+
+@cocotb.test()
+async def test_discriminator_debug(dut):
+
+    await reset_dut(dut)
+
+    # Start idle
+    await set_inputs(dut, low=0, high=0)
+    await settle()
+
+    dut._log.info("=== IDLE ===")
+    dut._log.info("ui_in   = %s", dut.ui_in.value)
+    dut._log.info("uo_out  = %s", dut.uo_out.value)
+
+    # --------------------------------------------------------
+    # LOW threshold rising
+    # --------------------------------------------------------
+
+    await set_inputs(dut, low=1, high=0)
+
+    await Timer(0.5, units="ns")
+
+    dut._log.info("=== LOW HIGH, +0.5 ns ===")
+    dut._log.info("uo_out = %s", dut.uo_out.value)
+
+    await Timer(2, units="ns")
+
+    dut._log.info("=== LOW HIGH, +2.5 ns ===")
+    dut._log.info("uo_out = %s", dut.uo_out.value)
+
+    await Timer(5, units="ns")
+
+    dut._log.info("=== LOW HIGH, +7.5 ns ===")
+    dut._log.info("uo_out = %s", dut.uo_out.value)
+
+    await Timer(10, units="ns")
+
+    dut._log.info("=== LOW HIGH, +17.5 ns ===")
+    dut._log.info("uo_out = %s", dut.uo_out.value)
+
+    # --------------------------------------------------------
+    # LOW threshold falling
+    # --------------------------------------------------------
+
+    await set_inputs(dut, low=0, high=0)
+
+    await Timer(0.5, units="ns")
+
+    dut._log.info("=== LOW LOW, +0.5 ns ===")
+    dut._log.info("uo_out = %s", dut.uo_out.value)
+
+    await Timer(2, units="ns")
+
+    dut._log.info("=== LOW LOW, +2.5 ns ===")
+    dut._log.info("uo_out = %s", dut.uo_out.value)
+
+    await Timer(5, units="ns")
+
+    dut._log.info("=== LOW LOW, +7.5 ns ===")
+    dut._log.info("uo_out = %s", dut.uo_out.value)
+
+    await Timer(10, units="ns")
+
+    dut._log.info("=== LOW LOW, +17.5 ns ===")
+    dut._log.info("uo_out = %s", dut.uo_out.value)
+
+    assert dut.uo_out.value.is_resolvable

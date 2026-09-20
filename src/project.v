@@ -21,7 +21,6 @@ module tt_um_schwallsunk_signal_discriminator (
     wire internal_rst; // Internal reset signal based on lower threshold state as well as external reset signal
     wire internal_rst_n; // Internal reset signal based on lower threshold state as well as external reset signal
     wire dly_internal_rst;
-    wire rst; //
     wire dly_high; // Internal reset signal based on lower threshold state as well as external reset signal
     wire dly_dly_high; // Internal reset signal based on lower threshold state as well as external reset signal
     wire dff_high_qn; // Output D-FF of the high triggered FF
@@ -49,7 +48,6 @@ module tt_um_schwallsunk_signal_discriminator (
     (* keep *) sg13g2_dfrbp_1  dff_high(.CLK(dly_dly_high),.RESET_B(dly_internal_rst),.D(1'b1),.Q_N(dff_high_qn));
     (* keep *) sg13g2_and2_1  and1(.X(coincidence_cont_q), .A(dff_high_qn), .B(dff_low_q));
     (* keep *) sg13g2_inv_2  inv0(.Y(internal_rst_n), .A(internal_rst));
-    (* keep *) sg13g2_inv_2  inv1(.Y(rst), .A(rst_n));
     (* keep *) sg13g2_dfrbp_1  dff_output(.CLK(internal_rst_n),.RESET_B(rst_dff_output_n),.D(coincidence_cont_q),.Q(dff_output_q));
     delay_gate_sim dly3(.in(dff_output_q),.out(dly_dff_rst_1));
     delay_gate_sim_triple dly4(.in(dff_output_q),.out(dly_dff_rst_3));
@@ -127,69 +125,37 @@ module counter_32_bit (
     output wire [31:0] out
 );
     wire dff_fbk_0;
-    wire dff_out_0;
     wire dff_fbk_1;
-    wire dff_out_1;
     wire dff_fbk_2;
-    wire dff_out_2;
     wire dff_fbk_3;
-    wire dff_out_3;
     wire dff_fbk_4;
-    wire dff_out_4;
     wire dff_fbk_5;
-    wire dff_out_5;
     wire dff_fbk_6;
-    wire dff_out_6;
     wire dff_fbk_7;
-    wire dff_out_7;
     wire dff_fbk_8;
-    wire dff_out_8;
     wire dff_fbk_9;
-    wire dff_out_9;
     wire dff_fbk_10;
-    wire dff_out_10;
     wire dff_fbk_11;
-    wire dff_out_11;
     wire dff_fbk_12;
-    wire dff_out_12;
     wire dff_fbk_13;
-    wire dff_out_13;
     wire dff_fbk_14;
-    wire dff_out_14;
     wire dff_fbk_15;
-    wire dff_out_15;
     wire dff_fbk_16;
-    wire dff_out_16;
     wire dff_fbk_17;
-    wire dff_out_17;
     wire dff_fbk_18;
-    wire dff_out_18;
     wire dff_fbk_19;
-    wire dff_out_19;
     wire dff_fbk_20;
-    wire dff_out_20;
     wire dff_fbk_21;
-    wire dff_out_21;
     wire dff_fbk_22;
-    wire dff_out_22;
     wire dff_fbk_23;
-    wire dff_out_23;
     wire dff_fbk_24;
-    wire dff_out_24;
     wire dff_fbk_25;
-    wire dff_out_25;
     wire dff_fbk_26;
-    wire dff_out_26;
     wire dff_fbk_27;
-    wire dff_out_27;
     wire dff_fbk_28;
-    wire dff_out_28;
     wire dff_fbk_29;
-    wire dff_out_29;
     wire dff_fbk_30;
-    wire dff_out_30;
     wire dff_fbk_31;
-    wire dff_out_31;
     (* keep *) sg13g2_dfrbp_1  dff_cnt_0(.CLK(cnt_in),.RESET_B(rst_n),.D(dff_fbk_0),.Q(out[0]),.Q_N(dff_fbk_0));
     (* keep *) sg13g2_dfrbp_1  dff_cnt_1(.CLK(dff_fbk_0),.RESET_B(rst_n),.D(dff_fbk_1),.Q(out[1]),.Q_N(dff_fbk_1));
     (* keep *) sg13g2_dfrbp_1  dff_cnt_2(.CLK(dff_fbk_1),.RESET_B(rst_n),.D(dff_fbk_2),.Q(out[2]),.Q_N(dff_fbk_2));

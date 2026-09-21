@@ -38,6 +38,7 @@ async def set_inputs(
     latch=0,
     counter0=0,
     counter1=0,
+    rst_n_cnt=1
 ):
     """
     ui_in assignment:
@@ -49,7 +50,7 @@ async def set_inputs(
         bit 4 = counter latch
         bit 5 = counter select 0
         bit 6 = counter select 1
-        bit 7 = unused
+        bit 7 = reset counter complement only
     """
 
     value = (
@@ -60,6 +61,7 @@ async def set_inputs(
         | (latch << 4)
         | (counter0 << 5)
         | (counter1 << 6)
+        | (rst_n_cnt << 7)
     )
 
     dut.ui_in.value = value
@@ -103,6 +105,7 @@ async def latch_counter(dut):
         latch=0,
         counter0=0,
         counter1=0,
+        rst_n_cnt=1
     )
     await settle()
 
@@ -114,6 +117,7 @@ async def latch_counter(dut):
         latch=1,
         counter0=0,
         counter1=0,
+        rst_n_cnt=1
     )
     await settle()
 
@@ -125,6 +129,7 @@ async def latch_counter(dut):
         latch=0,
         counter0=0,
         counter1=0,
+        rst_n_cnt=1
     )
     await settle()
 
@@ -151,6 +156,7 @@ async def read_counter_byte(dut, byte):
         latch=0,
         counter0=counter0,
         counter1=counter1,
+        rst_n_cnt=1
     )
     await settle()
 
@@ -185,6 +191,7 @@ async def generate_counter_event(dut):
         latch=0,
         counter0=0,
         counter1=0,
+        rst_n_cnt=1
     )
     await settle()
 
@@ -195,6 +202,7 @@ async def generate_counter_event(dut):
         latch=0,
         counter0=0,
         counter1=0,
+        rst_n_cnt=1
     )
     await settle()
 
@@ -205,6 +213,7 @@ async def generate_counter_event(dut):
         latch=0,
         counter0=0,
         counter1=0,
+        rst_n_cnt=1
     )
     await settle()
 

@@ -159,15 +159,17 @@ endmodule
 // DELAY STAGE PRIMITIVES 
 // ------------------------------------------------------------------
 module delay_gate_sim (input wire in, output wire out);
-     sg13g2_dlygate4sd2_1 dly0(.X(out), .A(in));
+    wire buf_4;
+    sg13g2_dlygate4sd2_1 dly0(.X(buf_4), .A(in));
+    sg13g2_buf_2 buf4(.X(out),.A(buf_4));
 endmodule
 
 module delay_gate_sim_triple (input wire in, output wire out);
-    wire delay_1, delay_2,buf_1;
+    wire delay_1, delay_2,buf_5;
     delay_gate_sim dly7 (.in(in), .out(delay_1));
     delay_gate_sim dly8 (.in(delay_1), .out(delay_2));
-    delay_gate_sim dly9 (.in(delay_2), .out(buf_1));
-    sg13g2_buf_4 buf0(.X(out),.A(buf_1));
+    delay_gate_sim dly9 (.in(delay_2), .out(buf_5));
+    sg13g2_buf_4 buf5(.X(out),.A(buf_5));
 endmodule
 
 module delay_gate_sim_nine (input wire in, output wire out);

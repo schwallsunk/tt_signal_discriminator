@@ -6,7 +6,7 @@
 `default_nettype none
 
 module tt_um_schwallsunk_signal_discriminator (
-    input  wire [7:0] ui_in,    // Dedicated inputs: 0=low thresh, 1=high thresh, 2=MUX IO DLY 0, 3=MUX IO DLY 1, 4=shift to buffer (latch_res), 5=MUX IO CNTR 0, 6=MUX IO CNTR 1
+    input  wire [7:0] ui_in,    // Dedicated inputs: 0=low thresh, 1=high thresh, 2=MUX IO DLY 0, 3=MUX IO DLY 1, 4=shift to buffer (latch_res), 5=MUX IO CNTR 0, 6=MUX IO CNTR 1, rst_counter
     output wire [7:0] uo_out,   // Dedicated outputs
     input  wire [7:0] uio_in,   // IOs: Input path
     output wire [7:0] uio_out,  // IOs: Output path
@@ -40,6 +40,7 @@ module tt_um_schwallsunk_signal_discriminator (
     wire buf_dly_dly_high;
     wire buf_dly_internal_rst;
     wire [31:0] counter_32_bit_out;
+    wire rst_n_cnt;
 
     // ------------------------------------------------------------------
     // LOGIC frontend start for discrimination
@@ -67,13 +68,15 @@ module tt_um_schwallsunk_signal_discriminator (
     (* keep *) sg13g2_mux4_1 mux0(.A0(dly_dff_rst_1),.A1(dly_dff_rst_3),.A2(dly_dff_rst_9),.A3(dly_dff_rst_27),.S0(ui_in[2]),.S1(ui_in[3]),.X(dly_dff_output_q));
     (* keep *) sg13g2_mux2_1 mux1(.X(rst_dff_output), .A0(1'b1), .A1(dly_dff_output_q), .S(rst_n));
     (* keep *) sg13g2_inv_2  inv3(.Y(rst_dff_output_n), .A(rst_dff_output));
+
+    sg13g2_and2_2  and2(.X(rst_n_cnt), .A(rst_n), .B(ui_in[7]));
     
     // ------------------------------------------------------------------
     // Counter & Register Array Call
     // ------------------------------------------------------------------
     counter_32_bit cnt0 (
         .cnt_in(dff_output_q), 
-        .rst_n(rst_n), 
+        .rst_n(rst_n_cnt), 
         .out(counter_32_bit_out)
     );
     
@@ -86,7 +89,7 @@ module tt_um_schwallsunk_signal_discriminator (
     );
 
     assign uo_out[0] = dff_output_q;
-    wire _unused = &{ui_in[7], uio_in, ena, clk, 1'b0};
+    wire _unused = &{ uio_in, ena, clk, 1'b0};
 endmodule
 
 // ------------------------------------------------------------------

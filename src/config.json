@@ -36,7 +36,7 @@
   "SYNTH_STRATEGY": "DELAY 1",
   "PL_RESIZER_HOLD_SLACK_MARGIN": 0.15,
   "GLB_RESIZER_HOLD_SLACK_MARGIN": 0.15,
-  "SDC_FILE": "dir::src/constraints.sdc"
+  "SDC_FILE": "dir::src/constraints.sdc",
 
   "//": "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",
   "//": "!!! DO NOT CHANGE ANYTHING BELOW THIS POINT !!!",

@@ -87,8 +87,7 @@ module tt_um_schwallsunk_signal_discriminator (
         .input_bits(counter_32_bit_out), 
         .out_uio(uio_out)
     );
-
-    assign uo_out[0] = dff_output_q;
+    sg13g2_buf_8 buf3(.X(uo_out[0]),.A(dff_output_q));
     wire _unused = &{ uio_in, ena, clk, 1'b0};
 endmodule
 

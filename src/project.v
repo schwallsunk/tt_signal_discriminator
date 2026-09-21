@@ -36,17 +36,23 @@ module tt_um_schwallsunk_signal_discriminator (
     wire dly_dff_rst_27;
     wire dly_dff_output_q;
     wire rst_dff_output_n;
+    wire buf_dly_dly_low;
+    wire buf_dly_dly_high;
+    wire buf_dly_internal_rst;
     wire [31:0] counter_32_bit_out;
 
     // ------------------------------------------------------------------
     // LOGIC frontend start for discrimination
     // ------------------------------------------------------------------
     (* keep *) sg13g2_dlygate4sd2_1  dly0(.X(dly_low), .A(ui_in[0]));
-    (* keep *) sg13g2_dlygate4sd2_1  dly00(.X(dly_dly_low), .A(dly_low));
+    (* keep *) sg13g2_dlygate4sd2_1  dly00(.X(buf_dly_dly_low), .A(dly_low));
+    (* keep *) sg13g2_buf_2 buf0(.X(dly_dly_low),.A(buf_dly_dly_low));
     (* keep *) sg13g2_dlygate4sd2_1  dly1(.X(dly_high), .A(ui_in[1]));
-    (* keep *) sg13g2_dlygate4sd2_1  dly10(.X(dly_dly_high), .A(dly_high));
+    (* keep *) sg13g2_dlygate4sd2_1  dly10(.X(buf_dly_dly_high), .A(dly_high));
+    (* keep *) sg13g2_buf_2 buf1(.X(dly_dly_high),.A(buf_dly_dly_high));
     (* keep *) sg13g2_and2_2  and0(.X(internal_rst), .A(ui_in[0]), .B(rst_n));
-    (* keep *) sg13g2_dlygate4sd2_1  dly2(.X(dly_internal_rst), .A(internal_rst));
+    (* keep *) sg13g2_dlygate4sd2_1  dly2(.X(buf_dly_internal_rst), .A(internal_rst));
+    (* keep *) sg13g2_buf_2 buf2(.X(dly_internal_rst),.A(buf_dly_internal_rst));
     (* keep *) sg13g2_dfrbp_2  dff_low(.CLK(dly_dly_low),.RESET_B(dly_internal_rst),.D(1'b1),.Q(dff_low_q));
     (* keep *) sg13g2_dfrbp_2  dff_high(.CLK(dly_dly_high),.RESET_B(dly_internal_rst),.D(1'b1),.Q_N(dff_high_qn));
     (* keep *) sg13g2_and2_2  and1(.X(coincidence_cont_q), .A(dff_high_qn), .B(dff_low_q));
@@ -148,17 +154,18 @@ module shift_reg_32_bit (
 endmodule
 
 // ------------------------------------------------------------------
-// DELAY STAGE PRIMITIVES (Maintained for Frontend Compatibility)
+// DELAY STAGE PRIMITIVES 
 // ------------------------------------------------------------------
 module delay_gate_sim (input wire in, output wire out);
      sg13g2_dlygate4sd2_1 dly0(.X(out), .A(in));
 endmodule
 
 module delay_gate_sim_triple (input wire in, output wire out);
-    wire delay_1, delay_2;
+    wire delay_1, delay_2,buf_1;
     delay_gate_sim dly7 (.in(in), .out(delay_1));
     delay_gate_sim dly8 (.in(delay_1), .out(delay_2));
-    delay_gate_sim dly9 (.in(delay_2), .out(out));
+    delay_gate_sim dly9 (.in(delay_2), .out(buf_1));
+    sg13g2_buf_4 buf0(.X(out),.A(buf_1));
 endmodule
 
 module delay_gate_sim_nine (input wire in, output wire out);
